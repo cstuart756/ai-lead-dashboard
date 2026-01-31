@@ -1,3 +1,4 @@
+django-environ
 Django==5.0.0
 gunicorn
 whitenoise
