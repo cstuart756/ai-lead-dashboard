@@ -1,0 +1,54 @@
+{% extends "leads/base.html" %}
+{% block content %}
+<h1>Leads</h1>
+
+<div class="card">
+  <form method="get">
+    <label>Status:
+      <select name="status">
+        <option value="">All</option>
+        <option value="NEW" {% if status == "NEW" %}selected{% endif %}>NEW</option>
+        <option value="QUALIFIED" {% if status == "QUALIFIED" %}selected{% endif %}>QUALIFIED</option>
+        <option value="CONTACTED" {% if status == "CONTACTED" %}selected{% endif %}>CONTACTED</option>
+        <option value="BOOKED" {% if status == "BOOKED" %}selected{% endif %}>BOOKED</option>
+        <option value="CLOSED" {% if status == "CLOSED" %}selected{% endif %}>CLOSED</option>
+      </select>
+    </label>
+
+    <label style="margin-left:12px;">
+      Assigned:
+      <select name="assigned">
+        <option value="">Anyone</option>
+        <option value="me" {% if assigned == "me" %}selected{% endif %}>Me</option>
+      </select>
+    </label>
+
+    <button type="submit">Filter</button>
+  </form>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Status</th>
+      <th>Assigned</th>
+      <th>Priority</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for lead in leads %}
+      <tr>
+        <td><a href="{% url 'lead_detail' lead.pk %}">{{ lead.name }}</a></td>
+        <td>{{ lead.email }}</td>
+        <td>{{ lead.status }}</td>
+        <td>{% if lead.assigned_to %}{{ lead.assigned_to.username }}{% else %}-{% endif %}</td>
+        <td>{% if lead.ai %}{{ lead.ai.priority_score }}{% else %}-{% endif %}</td>
+        <td>{{ lead.created_at }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

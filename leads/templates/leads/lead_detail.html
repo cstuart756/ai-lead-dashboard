@@ -1,0 +1,68 @@
+{% extends "leads/base.html" %}
+{% block content %}
+<h1>Lead: {{ lead.name }}</h1>
+
+<div class="card">
+  <p><strong>Email:</strong> {{ lead.email }}</p>
+  <p><strong>Company:</strong> {{ lead.company|default:"-" }}</p>
+  <p><strong>Message:</strong><br/>{{ lead.message }}</p>
+  <p><strong>Status:</strong> {{ lead.status }}</p>
+  <p><strong>Assigned:</strong> {% if lead.assigned_to %}{{ lead.assigned_to.username }}{% else %}-{% endif %}</p>
+</div>
+
+<div class="card">
+  <h3>AI Insight</h3>
+  {% if lead.ai %}
+    <p><strong>Category:</strong> {{ lead.ai.category }}</p>
+    <p><strong>Priority score:</strong> {{ lead.ai.priority_score }}</p>
+    <p><strong>Summary:</strong><br/>{{ lead.ai.summary }}</p>
+    <p><strong>Requirements (JSON):</strong><br/><pre>{{ lead.ai.extracted_requirements|safe }}</pre></p>
+  {% else %}
+    <p>No AI insight yet.</p>
+  {% endif %}
+
+  <form method="post" style="margin-top:10px;">
+    {% csrf_token %}
+    <button name="run_ai" value="1">Run AI triage</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Update Status / Assignment</h3>
+  <form method="post">
+    {% csrf_token %}
+    {{ status_form.as_p }}
+    <button name="update_status" value="1">Save</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Tasks</h3>
+  <ul>
+    {% for t in tasks %}
+      <li>{{ t.title }} — {{ t.status }}{% if t.assigned_to %} ({{ t.assigned_to.username }}){% endif %}</li>
+    {% empty %}
+      <li>No tasks yet.</li>
+    {% endfor %}
+  </ul>
+
+  <h4>Add task</h4>
+  <form method="post">
+    {% csrf_token %}
+    {{ task_form.as_p }}
+    <button name="add_task" value="1">Add</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Activity Log</h3>
+  <ul>
+    {% for a in activity %}
+      <li>{{ a.created_at }} — <strong>{{ a.action_type }}</strong> — {{ a.payload }}</li>
+    {% empty %}
+      <li>No activity yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% endblock %}
