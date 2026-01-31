@@ -8,33 +8,34 @@
     </div>
   </div>
   <div class="row g-4 justify-content-center mb-4">
-    <div class="col-12 col-md-4">
-      <div class="card shadow-sm border-0 text-center py-4">
-        <div class="mb-2" style="font-size:2.2rem; color:#0d6efd;"><i class="bi bi-calendar-day"></i></div>
-        <div class="fs-3 fw-semibold">{{ leads_today }}</div>
-        <div class="text-muted">Leads Today</div>
+      <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 text-center py-4">
+          <div class="mb-2" style="font-size:2.2rem; color:#0d6efd;"><i class="bi bi-calendar-day"></i></div>
+          <div class="fs-3 fw-semibold counter" data-target="{{ leads_today }}">0</div>
+          <div class="text-muted">Leads Today</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 text-center py-4">
+          <div class="mb-2" style="font-size:2.2rem; color:#198754;"><i class="bi bi-people"></i></div>
+          <div class="fs-3 fw-semibold counter" data-target="{{ total_leads }}">0</div>
+          <div class="text-muted">Total Leads</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 text-center py-4">
+          <div class="mb-2" style="font-size:2.2rem; color:#fd7e14;"><i class="bi bi-lightning-charge"></i></div>
+          <div class="fs-3 fw-semibold counter" data-target="{{ high_priority }}">0</div>
+          <div class="text-muted">High Priority (≥70)</div>
+        </div>
       </div>
     </div>
-    <div class="col-12 col-md-4">
-      <div class="card shadow-sm border-0 text-center py-4">
-        <div class="mb-2" style="font-size:2.2rem; color:#198754;"><i class="bi bi-people"></i></div>
-        <div class="fs-3 fw-semibold">{{ total_leads }}</div>
-        <div class="text-muted">Total Leads</div>
-      </div>
-    </div>
-    <div class="col-12 col-md-4">
-      <div class="card shadow-sm border-0 text-center py-4">
-        <div class="mb-2" style="font-size:2.2rem; color:#fd7e14;"><i class="bi bi-lightning-charge"></i></div>
-        <div class="fs-3 fw-semibold">{{ high_priority }}</div>
-        <div class="text-muted">High Priority (≥70)</div>
-      </div>
-    </div>
-  </div>
   <div class="row justify-content-center">
     <div class="col-12 col-md-6">
       <div class="card shadow-sm border-0 p-4">
         <h5 class="mb-3">Leads by Status</h5>
-        <ul class="list-group list-group-flush">
+        <canvas id="statusChart" height="180"></canvas>
+        <ul class="list-group list-group-flush mt-3">
           {% for row in by_status %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <span class="pill">{{ row.status }}</span>
@@ -48,4 +49,50 @@
 </div>
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// Animated counters
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.counter').forEach(function(counter) {
+    const updateCount = () => {
+      const target = +counter.getAttribute('data-target');
+      const count = +counter.innerText;
+      const increment = Math.ceil(target / 40);
+      if (count < target) {
+        counter.innerText = Math.min(count + increment, target);
+        setTimeout(updateCount, 20);
+      } else {
+        counter.innerText = target;
+      }
+    };
+    updateCount();
+  });
+
+  // Chart.js donut for status
+  const ctx = document.getElementById('statusChart');
+  if (ctx) {
+    const data = {
+      labels: [{% for row in by_status %}'{{ row.status }}',{% endfor %}],
+      datasets: [{
+        data: [{% for row in by_status %}{{ row.c }},{% endfor %}],
+        backgroundColor: [
+          '#0d6efd', '#198754', '#fd7e14', '#6f42c1', '#dc3545', '#20c997', '#ffc107', '#6610f2'
+        ],
+        borderWidth: 2
+      }]
+    };
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: data,
+      options: {
+        cutout: '70%',
+        plugins: {
+          legend: { display: true, position: 'bottom' }
+        }
+      }
+    });
+  }
+});
+</script>
 {% endblock %}
