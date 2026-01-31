@@ -1,4 +1,4 @@
-django-environ
+Django-environ
 Django==5.0.0
 gunicorn
 whitenoise
@@ -6,3 +6,4 @@ dj-database-url
 psycopg[binary]
 python-dotenv
 openai
+sentry-sdk
